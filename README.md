@@ -16,11 +16,9 @@ It includes:
 
 | Page            | Description                      | URL (after hosting)                                |
 |-----------------|----------------------------------|-----------------------------------------------------|
-| `index.html`    | Homepage to select game modes    | `https://<your-username>.github.io/<repo-name>/`    |
-| `single.html`   | Play against the clock solo      | `https://<your-username>.github.io/<repo-name>/single.html` |
-| `multiplayer.html` | Take turns with a friend       | `https://<your-username>.github.io/<repo-name>/multiplayer.html` |
-
-> 🔁 Replace `<your-username>` and `<repo-name>` with your actual GitHub username and repository name once hosted.
+| `index.html`    | Homepage to select game modes    | `https://MDDR2K4.github.io/PairUp/`    |
+| `single.html`   | Play against the clock solo      | `https://MDDR2K4.github.io/PairUp/single.html` |
+| `multiplayer.html` | Take turns with a friend       | `https://MDDR2K4.github.io/PairUp/multiplayer.html` |
 
 ---
 
@@ -46,7 +44,3 @@ It includes:
 This game was developed for **educational and entertainment purposes**. No data is collected, and the project is fully open-source.
 
 ---
-
-## 📎 License
-
-MIT License — feel free to use, modify, and share.
