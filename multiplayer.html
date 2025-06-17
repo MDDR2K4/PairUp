@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Two Player Pair Sum Game</title>
+  <style>
+    #gameFooter {
+  margin-top: 40px;
+  background: linear-gradient(to right, #1f1f1f, #2c2c2c);
+  padding: 20px;
+  font-size: 1rem;
+  color: #eee;
+  border-top: 2px solid #444;
+  text-align: center;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.3);
+  border-radius: 12px 12px 0 0;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.footer-top p {
+  margin: 5px 0;
+  color: #ccc;
+}
+
+.footer-links {
+  margin-top: 12px;
+}
+
+.footer-link {
+  margin: 0 14px;
+  text-decoration: none;
+  color: #ffffff;
+  font-weight: 600;
+  transition: color 0.3s ease, transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footer-link:hover {
+  color: #ff8400;
+  transform: scale(1.05);
+}
+
+    #backButton {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  font-size: 18px;
+  padding: 8px 16px;
+  background-color: #ffffffac;
+  color: rgb(0, 0, 0);
+  border: 3px;
+  border-radius: 20px;
+  border-color: #1313ff;
+  cursor: pointer;
+  z-index: 1000;
+  transition: background-color 0.3s ease;
+}
+
+#backButton:hover {
+  background-color: #ffffff;
+}
+
+    #soundToggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 1000;
+  color: #333;
+  transition: transform 0.2s ease;
+}
+
+#soundToggle:hover {
+  transform: scale(1.2);
+}
+
+    #floatingNumbers {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.floating-number {
+  position: absolute;
+  font-size: 10rem;
+  font-weight: bold;
+  opacity: 0.4;
+  color: #00000022;
+  animation: floatNumber 3s linear infinite;
+  user-select: none;
+}
+
+@keyframes floatNumber {
+  0% {
+    transform: translateY(100vh) scale(0.5);
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: translateY(-10vh) scale(1.5);
+    opacity: 0;
+  }
+}
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      background: linear-gradient(to bottom right, #f5f7fa, #c3cfe2);
+      margin: 0;
+      padding: 20px;
+    }
+    h2 {
+      margin: 10px 0;
+    }
+    #info {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .highlight-box {
+      padding: 10px 20px;
+      border: 2px solid #007bff;
+      border-radius: 10px;
+      background: white;
+      font-weight: bold;
+      font-size: 1.1em;
+    }
+    .active-player {
+      color: green;
+    }
+    .inactive-player {
+      color: gray;
+    }
+    #grid {
+      display: grid;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+    .cell {
+      width: 70px;
+      height: 70px;
+      font-size: 2rem;
+      border-radius: 8px;
+      border: 2px solid #007bff;
+      background: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+    .selected {
+      background: #d1e7fd;
+    }
+    .error {
+      background: #ffc2c2 !important;
+    }
+    #timerBox {
+      font-size: 1.8rem;
+      border: 2px solid #ff9800;
+      padding: 10px 20px;
+      border-radius: 10px;
+      background: #fffbe6;
+    }
+    .warning {
+      color: red;
+      animation: blink 1s step-start infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 25px;
+      font-size: 1rem;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0,0,0,0.6);
+    }
+    #modalContent {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+  </style>
+</head>
+<!-- Floating Background Numbers -->
+<div id="floatingNumbers"></div>
+<body>
+<button id="soundToggle" onclick="toggleSound()">🔊</button>
+<button id="backButton" onclick="goBack()">🔙</button>
+
+
+<h2>🎯 Two Player Mode</h2>
+
+<div id="info">
+  <div class="highlight-box">Player: <span id="currentPlayer" class="active-player">Player 1</span></div>
+  <div class="highlight-box" id="target">Target: </div>
+  <div class="highlight-box" id="timerBox">⏳ Time: <span id="timer">60</span>s</div>
+</div>
+
+<div id="grid"></div>
+
+<div id="playerTimes" style="margin-top: 20px;"></div>
+
+<button onclick="initGame()">Restart Game</button>
+
+<!-- Modal -->
+<div id="modal">
+  <div id="modalContent">
+    <h2 id="resultTitle"></h2>
+    <p id="resultDetails"></p>
+    <button onclick="closeModal()">OK</button>
+  </div>
+</div>
+
+
+<script>
+  const grid = document.getElementById('grid');
+  const targetDiv = document.getElementById('target');
+  const timerSpan = document.getElementById('timer');
+  const playerSpan = document.getElementById('currentPlayer');
+  const playerTimesDiv = document.getElementById('playerTimes');
+  const modal = document.getElementById('modal');
+  const resultTitle = document.getElementById('resultTitle');
+  const resultDetails = document.getElementById('resultDetails');
+
+  let gridSize = 4, timer = 60, interval;
+  let selected = [], numbers = [], target = 0;
+  let player = 1, timeTaken = [0, 0];
+  let allowNegatives = false;
+
+  function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function generateGrid() {
+    grid.innerHTML = '';
+    numbers = [];
+    const totalCells = gridSize * gridSize;
+    const numPairs = Math.floor(totalCells / 2);
+    target = randomInt(15, 30);
+
+    for (let i = 0; i < numPairs; i++) {
+      let a = randomInt(1, target - 1);
+      if (allowNegatives && Math.random() < 0.5) a = randomInt(-20, 20);
+      let b = target - a;
+      numbers.push(a, b);
+    }
+
+    if (numbers.length < totalCells) {
+      numbers.push(randomInt(-10, 10));
+    }
+
+    numbers.sort(() => Math.random() - 0.5);
+    grid.style.gridTemplateColumns = `repeat(${gridSize}, 70px)`;
+
+    numbers.forEach((num, idx) => {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.textContent = num;
+      cell.dataset.index = idx;
+      cell.onclick = () => selectCell(cell);
+      grid.appendChild(cell);
+    });
+
+    targetDiv.textContent = `Target: ${target}`;
+  }
+
+  function selectCell(cell) {
+    const idx = cell.dataset.index;
+    if (selected.includes(idx)) return;
+
+    selected.push(idx);
+    cell.classList.add('selected');
+
+    if (selected.length === 2) {
+      const cell1 = document.querySelector(`[data-index="${selected[0]}"]`);
+      const cell2 = document.querySelector(`[data-index="${selected[1]}"]`);
+      const val1 = parseInt(numbers[selected[0]]);
+      const val2 = parseInt(numbers[selected[1]]);
+
+      if (val1 + val2 === target) {
+        cell1.style.visibility = 'hidden';
+        cell2.style.visibility = 'hidden';
+        numbers[selected[0]] = null;
+        numbers[selected[1]] = null;
+        if (checkWin()) endTurn(true);
+      } else {
+        cell1.classList.add('error');
+        cell2.classList.add('error');
+        setTimeout(() => {
+          cell1.classList.remove('error', 'selected');
+          cell2.classList.remove('error', 'selected');
+        }, 600);
+      }
+      selected = [];
+    }
+  }
+
+  function checkWin() {
+    const remaining = numbers.filter(n => n !== null);
+    for (let i = 0; i < remaining.length; i++) {
+      for (let j = i + 1; j < remaining.length; j++) {
+        if (remaining[i] + remaining[j] === target) return false;
+      }
+    }
+    return true;
+  }
+      function goBack() {
+  window.location.href = 'index.html'; // Change 'landing.html' to your actual selection page
+}
+  function updateTimer() {
+    timer--;
+    timerSpan.textContent = timer;
+    if (timer <= 10) timerSpan.parentElement.classList.add('warning');
+    if (timer === 0) endTurn(false);
+  }
+
+  function endTurn(won) {
+  clearInterval(interval);
+  let used = 60 - timer;
+  timeTaken[player - 1] = won ? used : null;
+
+  if (player === 1) {
+    // Show modal for Player 2 start
+    resultTitle.textContent = "✅ Player 1 Turn Complete!";
+    resultDetails.innerHTML = `
+      Time Taken: ${won ? used + "s" : "❌ Failed"}<br><br>
+      Player 2's turn.
+    `;
+    modal.style.display = 'flex';
+
+    const modalBtn = modal.querySelector('button');
+    modalBtn.textContent = "Start";
+    modalBtn.onclick = () => {
+      modal.style.display = 'none';
+      player = 2;
+      startPlayerTurn();
+    };
+  } else {
+    showResults();
+  }
+}
+
+  function showResults() {
+  let p1 = timeTaken[0];
+  let p2 = timeTaken[1];
+  let result = "";
+
+  if (p1 === null && p2 === null) {
+    result = "none";
+    resultTitle.textContent = "❌ Both players failed!";
+    resultDetails.textContent = "Try again.";
+  } else if (p1 === null) {
+    result = "player2";
+    resultTitle.textContent = "🎉 Player 2 Wins!";
+    resultDetails.textContent = "Player 1 failed. Player 2 time: " + p2 + "s";
+  } else if (p2 === null) {
+    result = "player1";
+    resultTitle.textContent = "🎉 Player 1 Wins!";
+    resultDetails.textContent = "Player 2 failed. Player 1 time: " + p1 + "s";
+  } else if (p1 < p2) {
+    result = "player1";
+    resultTitle.textContent = "🏆 Player 1 Wins!";
+    resultDetails.textContent = `Player 1: ${p1}s | Player 2: ${p2}s`;
+  } else if (p2 < p1) {
+    result = "player2";
+    resultTitle.textContent = "🏆 Player 2 Wins!";
+    resultDetails.textContent = `Player 1: ${p1}s | Player 2: ${p2}s`;
+  } else {
+    result = "draw";
+    resultTitle.textContent = "🤝 It's a Draw!";
+    resultDetails.textContent = `Both players finished in ${p1}s`;
+  }
+
+  // Play appropriate sound
+  if (result === "draw") {
+    playSound(winSound);
+  } else if (result === "player1" || result === "player2") {
+    playSound(winSound);
+  } else {
+    playSound(loseSound);
+  }
+
+  // Setup modal buttons
+  modal.style.display = 'flex';
+  const modalBtn = modal.querySelector('button');
+  modalBtn.textContent = "🔁 Retake Game";
+  modalBtn.onclick = () => {
+    modal.style.display = 'none';
+    initGame(); // restart full game
+  };
+
+  // Optional: Add a second button for "replay same target" (you can comment this if not needed)
+  if (!document.getElementById('replaySameTarget')) {
+    const sameBtn = document.createElement('button');
+    sameBtn.id = 'replaySameTarget';
+    sameBtn.textContent = "🔄 Replay Same Target";
+    sameBtn.style.marginTop = "10px";
+    sameBtn.onclick = () => {
+      modal.style.display = 'none';
+      timeTaken = [0, 0];
+      player = 1;
+      startPlayerTurn(); // replay same grid
+    };
+    modal.querySelector('#modalContent').appendChild(sameBtn);
+  }
+}
+
+
+  function closeModal() {
+    modal.style.display = 'none';
+    initGame();
+  }
+
+ function startPlayerTurn() {
+  timer = 60;
+  timerSpan.textContent = timer;
+  timerSpan.parentElement.classList.remove('warning');
+  selected = [];
+  generateGrid();
+  interval = setInterval(updateTimer, 1000);
+  playerSpan.textContent = `Player ${player}`;
+  playerSpan.classList.add('active-player');
+  playerSpan.classList.remove('inactive-player');
+}
+
+  function initGame() {
+    clearInterval(interval);
+    player = 1;
+    timeTaken = [0, 0];
+    playerSpan.textContent = "Player 1";
+    playerSpan.classList.add('active-player');
+    playerSpan.classList.remove('inactive-player');
+    playerTimesDiv.innerHTML = "";
+    startPlayerTurn();
+  }
+  function createFloatingNumbers() {
+  const container = document.getElementById('floatingNumbers');
+  for (let i = 0; i < 40; i++) {
+    const num = document.createElement('div');
+    num.classList.add('floating-number');
+    num.textContent = Math.floor(Math.random() * 99);
+
+    num.style.left = `${Math.random() * 100}%`;
+    num.style.animationDuration = `${6 + Math.random() * 6}s`;
+    num.style.fontSize = `${1 + Math.random() * 2}rem`;
+
+    container.appendChild(num);
+    setTimeout(() => container.removeChild(num), 12000);
+  }
+}
+
+// Call once and then every few seconds to keep ambient feel
+createFloatingNumbers();
+setInterval(createFloatingNumbers, 5000);
+let soundEnabled = true;
+
+// Placeholder Audio Elements (make sure these are loaded somewhere globally)
+const bgMusic = new Audio('back.mp3'); // Replace with your file
+const winSound = new Audio('win.mp3');             // Replace with your file
+const loseSound = new Audio('lose.mp3');           // Replace with your file
+const tickSound = new Audio('tick.mp3');           // Replace with your file
+
+bgMusic.loop = true;
+bgMusic.volume = 0.3;
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  document.getElementById('soundToggle').textContent = soundEnabled ? '🔊' : '🔇';
+  if (soundEnabled) {
+    bgMusic.play();
+  } else {
+    bgMusic.pause();
+  }
+}
+
+// Play sound only if enabled
+function playSound(audio) {
+  if (soundEnabled) {
+    audio.currentTime = 0;
+    audio.play();
+  }
+}
+
+// Example usage (you can hook these into your game events):
+// playSound(winSound);
+// playSound(loseSound);
+// playSound(tickSound);
+
+// Start background music at game start (if sound is enabled)
+window.addEventListener('load', () => {
+  if (soundEnabled) {
+    bgMusic.play().catch(() => {
+      console.log("Autoplay blocked – will start on user interaction");
+    });
+  }
+});
+
+
+  window.onload = initGame;
+</script>
+  <footer id="gameFooter">
+  <div class="footer-top">
+    <p>🎮 Made with ❤️ by Deeraj |  Pair Game v1.0</p>
+    <p>💡 Test your brains 🧠</p>
+  </div>
+
+  <div class="footer-links">
+    <a href="mailto:mdeerajdrao@gmail.com" target="_blank" class="footer-link">
+      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 13.065L1.5 6.75V18h21V6.75L12 13.065zM12 11.25L1.5 5.25h21L12 11.25z"/></svg>
+      Email
+    </a>
+    <a href="https://linkedin.com/in/mdeerajdrao" target="_blank" class="footer-link">
+      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3A2 2 0 0 1 21 5v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h14zm-8.75 14v-5.25H8v5.25h2.25zm-1.125-6a1.312 1.312 0 1 1 0-2.625 1.312 1.312 0 0 1 0 2.625zM18 17h-2.25v-2.925c0-.72-.26-1.213-.91-1.213-.497 0-.793.33-.924.65-.05.12-.062.29-.062.46V17h-2.25s.03-8.25 0-9.11H15v1.29c.298-.46.835-1.113 2.03-1.113 1.48 0 2.585.96 2.585 3.02V17z"/></svg>
+      LinkedIn
+    </a>
+    <a href="https://github.com/MDDR2K4" target="_blank" class="footer-link">
+      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.372 0 12c0 5.303 3.438 9.8 8.207 11.387.6.113.793-.26.793-.577v-2.036c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.744.082-.729.082-.729 1.204.084 1.84 1.235 1.84 1.235 1.07 1.832 2.809 1.303 3.495.996.107-.776.418-1.303.762-1.602-2.665-.3-5.466-1.334-5.466-5.93 0-1.31.468-2.38 1.236-3.222-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.3 1.23a11.48 11.48 0 0 1 3-.404c1.02.004 2.047.137 3 .404 2.29-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.873.118 3.176.77.842 1.236 1.912 1.236 3.222 0 4.61-2.803 5.628-5.475 5.922.429.37.823 1.096.823 2.21v3.285c0 .32.192.694.801.576C20.565 21.796 24 17.3 24 12c0-6.628-5.373-12-12-12z"/></svg>
+      GitHub
+    </a>
+  </div>
+</footer>
+
+
+
+</body>
+</html>
